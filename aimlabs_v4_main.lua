@@ -1,4 +1,4 @@
-Version = '4.1b'
+Version = '4.1c'
 
 local SMode = false
 
@@ -29,6 +29,7 @@ else
 	Aiming.Settings.TargetPart = {"Head"}
 	Aiming.Settings.FOVSettings.Colour = Color3.new(1, 0.831372, 0.949019)
 	Aiming.Settings.FOVSettings.Sides = 30
+	Aiming.Settings.TracerSettings.Enabled = false
 
 	AimingSelected = Aiming.Selected
 	AimingChecks = Aiming.Checks
