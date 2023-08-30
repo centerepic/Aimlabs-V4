@@ -6,3 +6,9 @@ Also less pasted code.
 
 #### Aiming Library - https://github.com/Stefanuk12/Aiming
 #### ESP Library (Modified slightly for this project) - Kiriot ESP Library (Can't find the original anymore.)
+
+
+### Todo:
+- V-Resolver
+- UI Themes
+- Configuration Saving
