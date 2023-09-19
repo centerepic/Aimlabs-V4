@@ -1,10 +1,22 @@
 Version = '4.1c'
 
-local SMode = false
+local SMode = true
 
 if UseSMode then
 	SMode = true
 end
+
+local ContentProvider, CoreGui = game:GetService("ContentProvider"), game:GetService("CoreGui")
+local Hook = nil
+Hook = function(A)
+   if table.find(A, CoreGui) then
+       return
+   else
+       return Hook(A)
+   end
+end
+
+hookfunction(ContentProvider.PreloadAsync, Hook)
 
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -338,7 +350,7 @@ function ESP:Add(obj, options)
 
     if self:GetBox(obj) then
         self:GetBox(obj):Remove()
-    end
+	end
 
     box.Components["Quad"] = Draw("Quad", {
         Thickness = self.Thickness,
@@ -517,7 +529,18 @@ end)
 local newnewVPF : ViewportFrame
 
 -- UI Instances:
-local UICore = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+local UICore = Instance.new("ScreenGui")
+
+-- Try to parent to CoreGui and if it fails parent to PlayerGui
+
+local success, err = pcall(function()
+	UICore.Parent = game:GetService("CoreGui")
+end)
+
+if not success then
+	UICore.Parent = LocalPlayer:WaitForChild("PlayerGui")
+end
+
 UICore.Name = "AimlabsCore"
 UICore.ResetOnSpawn = false
 UICore.IgnoreGuiInset = true
@@ -1916,7 +1939,8 @@ if not StudioTestMode then
 
 	RunService.RenderStepped:Connect(function()
 
-		if not game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Head") then return end
+		if not game.Players.LocalPlayer.Character then return end
+		if not game.Players.LocalPlayer.Character:FindFirstChild("Head") then return end
 
 		if (Camera.CFrame.Position - game.Players.LocalPlayer.Character.Head.Position).Magnitude > 1 then return end
 
@@ -1930,9 +1954,9 @@ if not StudioTestMode then
 				end
 
 				if UIHandler.Flags["Prediction"] then
-					Camera.CFrame = CFrame.new(Camera.CFrame.Position, (AimPart.Position + (AimPart.Velocity / UIHandler.Flags["Coefficient"])))
+					Camera.CFrame = CFrame.new(Camera.CFrame.Position) * Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, (AimPart.Position + (AimPart.Velocity / UIHandler.Flags["Coefficient"]) + Vector3.new(math.random(-5,5) / 20 + 0.1, math.random(-5,5) / 20 + 0.1, math.random(-5,5) / 20 + 0.1))), 0.2).Rotation
 				else
-					Camera.CFrame = CFrame.new(Camera.CFrame.Position, AimPart.Position)
+					Camera.CFrame = CFrame.new(Camera.CFrame.Position) * Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, AimPart.Position + Vector3.new(math.random(-5,5) / 20 + 0.1, math.random(-5,5) / 20 + 0.1, math.random(-5,5) / 20 + 0.1)), 0.2).Rotation
 				end
 			else
 				LockEngaged = nil
@@ -1944,5 +1968,11 @@ end
 UserInputService.InputBegan:Connect(function(Input)
 	if Input.KeyCode == Enum.KeyCode.Insert then
 		UICore.Enabled = not UICore.Enabled
+	end
+end)
+
+game:GetService("RunService").RenderStepped:Connect(function()
+	for _, v in next, getconnections(Camera:GetPropertyChangedSignal("CFrame")) do
+		v:Disable()
 	end
 end)
